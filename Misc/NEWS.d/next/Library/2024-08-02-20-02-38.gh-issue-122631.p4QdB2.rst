@@ -1,4 +1,7 @@
 Add :mod:`mimetypes` support for `video/3gpp`_ and `video/3gpp2`_.
+In a breaking change, :data:`mimetypes.types_map` now maps from
+string ->list[string] instead of string->string, to support extensions that can
+represent multiple types (namely, the various extensions for 3GPP files).
 
 .. _video/3gpp: https://www.iana.org/assignments/media-types/video/3gpp
 .. _video/3gpp2: https://www.iana.org/assignments/media-types/video/3gpp2
