@@ -15,7 +15,6 @@ inited -- flag set when init() has been called
 suffix_map -- dictionary mapping suffixes to suffixes
 encodings_map -- dictionary mapping suffixes to encodings
 types_map -- dictionary mapping suffixes to types
-duplicate_types_map -- dictionary mapping suffixes to types for suffixes that map to multiple types
 
 Functions:
 
@@ -81,7 +80,6 @@ class MimeTypes:
             self.add_type(type, ext, True)
         for (ext, type) in _common_types_default:
             self.add_type(type, ext, False)
-
         for name in filenames:
             self.read(name, strict)
 
