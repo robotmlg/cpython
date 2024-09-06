@@ -86,14 +86,14 @@ class MimeTypesTestCase(unittest.TestCase):
             with open(file, 'w', encoding="utf-8") as f:
                 f.write(data)
             mime_dict = mimetypes.read_mime_types(file)
-            eq(mime_dict[".pyunit"], "x-application/x-unittest")
+            eq(mime_dict[".pyunit"][0], "x-application/x-unittest")
 
             data = "x-application/x-unittest2 pyunit2\n"
             file = os.path.join(directory, "sample2.mimetype")
             with open(file, 'w', encoding="utf-8") as f:
                 f.write(data)
             mime_dict = mimetypes.read_mime_types(os_helper.FakePath(file))
-            eq(mime_dict[".pyunit2"], "x-application/x-unittest2")
+            eq(mime_dict[".pyunit2"][0], "x-application/x-unittest2")
 
         # bpo-41048: read_mime_types should read the rule file with 'utf-8' encoding.
         # Not with locale encoding. _bootlocale has been imported because io.open(...)
@@ -105,14 +105,7 @@ class MimeTypesTestCase(unittest.TestCase):
                                         return_value=fp) as mock_open:
             mime_dict = mimetypes.read_mime_types(filename)
             mock_open.assert_called_with(filename, encoding='utf-8')
-        eq(mime_dict[".Français"], "application/no-mans-land")
-
-    def test_duplicate_ext_types(self):
-        # assert that each extension in the duplicate map is also in the default map
-        # for a different type
-        for ext, type in mimetypes.duplicate_ext_types.items():
-            self.assertIn(ext, mimetypes._types_map_default)
-            self.assertNotEqual(type, mimetypes._types_map_default[ext])
+        eq(mime_dict[".Français"][0], "application/no-mans-land")
 
     def test_non_standard_types(self):
         eq = self.assertEqual
@@ -225,8 +218,9 @@ class MimeTypesTestCase(unittest.TestCase):
         # The test fails on Windows because Windows adds mime types from the Registry
         # and that creates some duplicates.
         from mimetypes import types_map
-        for v in types_map.values():
-            self.assertIsNotNone(mimetypes.guess_extension(v))
+        for v_list in types_map.values():
+            for v in v_list:
+                self.assertIsNotNone(mimetypes.guess_extension(v))
 
     def test_preferred_extension(self):
         def check_extensions():
@@ -266,7 +260,6 @@ class MimeTypesTestCase(unittest.TestCase):
         encodings_map = mimetypes.encodings_map
         types_map = mimetypes.types_map
         common_types = mimetypes.common_types
-        duplicate_ext_types = mimetypes.duplicate_ext_types
 
         mimetypes.init()
         self.assertIsNot(suffix_map, mimetypes.suffix_map)
@@ -277,7 +270,6 @@ class MimeTypesTestCase(unittest.TestCase):
         self.assertEqual(encodings_map, mimetypes.encodings_map)
         self.assertEqual(types_map, mimetypes.types_map)
         self.assertEqual(common_types, mimetypes.common_types)
-        self.assertEqual(duplicate_ext_types, mimetypes.duplicate_ext_types)
 
     def test_path_like_ob(self):
         filename = "LICENSE.txt"
