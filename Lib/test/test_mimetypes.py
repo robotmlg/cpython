@@ -86,14 +86,14 @@ class MimeTypesTestCase(unittest.TestCase):
             with open(file, 'w', encoding="utf-8") as f:
                 f.write(data)
             mime_dict = mimetypes.read_mime_types(file)
-            eq(mime_dict[".pyunit"], "x-application/x-unittest")
+            eq(mime_dict[".pyunit"][0], "x-application/x-unittest")
 
             data = "x-application/x-unittest2 pyunit2\n"
             file = os.path.join(directory, "sample2.mimetype")
             with open(file, 'w', encoding="utf-8") as f:
                 f.write(data)
             mime_dict = mimetypes.read_mime_types(os_helper.FakePath(file))
-            eq(mime_dict[".pyunit2"], "x-application/x-unittest2")
+            eq(mime_dict[".pyunit2"][0], "x-application/x-unittest2")
 
         # bpo-41048: read_mime_types should read the rule file with 'utf-8' encoding.
         # Not with locale encoding. _bootlocale has been imported because io.open(...)
@@ -105,7 +105,7 @@ class MimeTypesTestCase(unittest.TestCase):
                                         return_value=fp) as mock_open:
             mime_dict = mimetypes.read_mime_types(filename)
             mock_open.assert_called_with(filename, encoding='utf-8')
-        eq(mime_dict[".Français"], "application/no-mans-land")
+        eq(mime_dict[".Français"][0], "application/no-mans-land")
 
     def test_non_standard_types(self):
         eq = self.assertEqual
@@ -218,8 +218,9 @@ class MimeTypesTestCase(unittest.TestCase):
         # The test fails on Windows because Windows adds mime types from the Registry
         # and that creates some duplicates.
         from mimetypes import types_map
-        for v in types_map.values():
-            self.assertIsNotNone(mimetypes.guess_extension(v))
+        for v_list in types_map.values():
+            for v in v_list:
+                self.assertIsNotNone(mimetypes.guess_extension(v))
 
     def test_preferred_extension(self):
         def check_extensions():
@@ -231,6 +232,8 @@ class MimeTypesTestCase(unittest.TestCase):
             self.assertEqual(mimetypes.guess_extension('application/x-texinfo'), '.texi')
             self.assertEqual(mimetypes.guess_extension('application/x-troff'), '.roff')
             self.assertEqual(mimetypes.guess_extension('application/xml'), '.xsl')
+            self.assertEqual(mimetypes.guess_extension('audio/3gpp'), '.3gp')
+            self.assertEqual(mimetypes.guess_extension('audio/3gpp2'), '.3g2')
             self.assertEqual(mimetypes.guess_extension('audio/mpeg'), '.mp3')
             self.assertEqual(mimetypes.guess_extension('image/avif'), '.avif')
             self.assertEqual(mimetypes.guess_extension('image/webp'), '.webp')
@@ -241,6 +244,8 @@ class MimeTypesTestCase(unittest.TestCase):
             self.assertEqual(mimetypes.guess_extension('text/plain'), '.txt')
             self.assertEqual(mimetypes.guess_extension('text/rtf'), '.rtf')
             self.assertEqual(mimetypes.guess_extension('text/x-rst'), '.rst')
+            self.assertEqual(mimetypes.guess_extension('video/3gpp'), '.3gp')
+            self.assertEqual(mimetypes.guess_extension('video/3gpp2'), '.3g2')
             self.assertEqual(mimetypes.guess_extension('video/mpeg'), '.mpeg')
             self.assertEqual(mimetypes.guess_extension('video/quicktime'), '.mov')
 
